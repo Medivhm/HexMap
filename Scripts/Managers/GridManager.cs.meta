@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 631cfa3b6e91d154494880f7ed93a43d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _scriptableGrid: {fileID: 11400000, guid: 9203d5d76aab5c94ca9cbeb3b986c6b0, type: 2}
+  - _playerSprite: {instanceID: 0}
+  - _goalSprite: {instanceID: 0}
+  - _unitPrefab: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
