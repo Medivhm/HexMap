@@ -5,9 +5,9 @@ using UnityEngine;
 
 public enum GridType
 {
-    Playable,   // 交互关卡
-    Obstacle,   // 障碍
-    Road,       // 可行走区域
+    Playable = 0,   // 交互关卡
+    Obstacle,       // 障碍
+    Road,           // 可行走区域
 }
 
 //          5    /\   0
@@ -16,12 +16,13 @@ public enum GridType
 
 public enum SidePos
 {
-    TopRight = 0,   // +3) % 6
-    Right,
-    BottomRight,
-    BottomLeft,
-    Left,
-    TopLeft,
+    NE = 0,   // +3) % 6
+    E,
+    SE,
+    SW,
+    W,
+    NW,
+    None,
 }
 
 namespace Tiles {
@@ -50,44 +51,39 @@ namespace Tiles {
         // 判断是否相连（可通行）
         public bool IsConnect(HexNode other)
         {
-            //int a = this.G - other.G;
-            //other.G,other.H,other.F
+            SidePos thisPos = OtherInWhere(other);
+            return CanPass(thisPos) && other.CanPass(SwapSide(thisPos));
+        }
 
-            SidePos thisPos;
+        public SidePos OtherInWhere(HexNode other)
+        {
             float a = this.Coords.MapCoord.x - other.Coords.MapCoord.x;
             float b = this.Coords.MapCoord.y - other.Coords.MapCoord.y;
-            if(a == 0 && b == -1)
+            if (a == 0 && b == -1)
             {
-                thisPos = SidePos.TopRight;
-                return CanPass(thisPos) && other.CanPass(SwapSide(thisPos));
+                return SidePos.NE;
             }
-            else if(a == -1 && b == 0)
+            else if (a == -1 && b == 0)
             {
-                thisPos = SidePos.Right;
-                return CanPass(thisPos) && other.CanPass(SwapSide(thisPos));
+                return SidePos.E;
             }
             else if (a == -1 && b == 1)
             {
-                thisPos = SidePos.BottomRight;
-                return CanPass(thisPos) && other.CanPass(SwapSide(thisPos));
+                return SidePos.SE;
             }
             else if (a == 0 && b == 1)
             {
-                thisPos = SidePos.BottomLeft;
-                return CanPass(thisPos) && other.CanPass(SwapSide(thisPos));
+                return SidePos.SW;
             }
             else if (a == 1 && b == 0)
             {
-                thisPos = SidePos.Left;
-                return CanPass(thisPos) && other.CanPass(SwapSide(thisPos));
+                return SidePos.W;
             }
             else if (a == 1 && b == -1)
             {
-                thisPos = SidePos.TopLeft;
-                return CanPass(thisPos) && other.CanPass(SwapSide(thisPos));
+                return SidePos.NW;
             }
-
-            return true;
+            return SidePos.None;
         }
 
 

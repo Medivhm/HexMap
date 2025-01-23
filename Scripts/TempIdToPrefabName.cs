@@ -39,6 +39,15 @@ public static class TempIdToPrefabName
         {new Vector2Int(4,4), 4 },
         {new Vector2Int(4,5), 4 },
         {new Vector2Int(4,6), 4 },
+        {new Vector2Int(5,3), 3 },
+        {new Vector2Int(6,2), 3 },
+        {new Vector2Int(7,2), 6 },
+        {new Vector2Int(8,2), 3 },
+        {new Vector2Int(7,3), 3 },
+        {new Vector2Int(6,4), 3 },
+        {new Vector2Int(5,5), 3 },
+        {new Vector2Int(5,6), 3 },
+        {new Vector2Int(4,7), 3 },
     };
 
     public static string FindName(Vector2Int mapCoord)

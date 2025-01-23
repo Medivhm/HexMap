@@ -1,78 +1,159 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Diagnostics;
+using UnityEngine.UIElements;
 
 namespace Tiles
 {
-    public class Unit : MonoBehaviour {
-        [SerializeField] private SpriteRenderer _renderer;
-        [SerializeField] private Animator _animator;
-        private float moveSpeed = 5f;
-        public Vector2 HexCoord;
-        public bool IsMoving => _isMoving;
+    public static class MapDirection
+    {
+        public static readonly Quaternion NE = Quaternion.Euler(0f, 0f, 145f);
+        public static readonly Quaternion E = Quaternion.Euler(0f, 0f, 90f);
+        public static readonly Quaternion SE = Quaternion.Euler(0f, 0f, 45f);
+        public static readonly Quaternion SW = Quaternion.Euler(0f, 0f, -45f);
+        public static readonly Quaternion W = Quaternion.Euler(0f, 0f, -90f);
+        public static readonly Quaternion NW = Quaternion.Euler(0f, 0f, -135f);
 
-        public void Init(Sprite sprite) {
-            _renderer.sprite = sprite;
-        }
-
-        public void SetAnimatorEnabled(bool state)
+        public static Quaternion SideToMapDirection(SidePos sidePos)
         {
-            _animator.enabled = state;
+            switch (sidePos)
+            {
+                case SidePos.NE:
+                    return MapDirection.NE;
+                case SidePos.E:
+                    return MapDirection.E;
+                case SidePos.SE:
+                    return MapDirection.SE;
+                case SidePos.SW:
+                    return MapDirection.SW;
+                case SidePos.W:
+                    return MapDirection.W;
+                case SidePos.NW:
+                    return MapDirection.NW;
+            }
+            return Quaternion.identity;
         }
 
-        private bool _isMoving;
+        public static Quaternion PosFaceToNodeMapDirection(Vector3 pos, HexNode node)
+        {
+            Vector3 nodePos = node.Coords.WorldPos;
+            Vector3 diff = pos - nodePos;
+            if(diff.x > 0 && Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
+            {
+                if(diff.y > 0)
+                {
+                    return MapDirection.SW;
+                }
+                else
+                {
+                    return MapDirection.NW;
+                }
+            }
+            else if(diff.x < 0 && Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
+            {
+                if (diff.y > 0)
+                {
+                    return MapDirection.SE;
+                }
+                else
+                {
+                    return MapDirection.NE;
+                }
+            }
+            else if(diff.x > 0)
+            {
+                return MapDirection.W;
+            }
+            else
+            {
+                return MapDirection.E;
+            }
+        }
+    };
+
+    public abstract class Unit : MonoBehaviour
+    {
+        [SerializeField] private float _moveSpeed = 1.8f;
+        [SerializeField] private float rotationSpeed = 2f;
+        private SpriteRenderer _renderer;
+        private Animator _animator;
+
+        protected QuickTimer quickTimer;
+
+        public Vector2Int HexCoord;
+        public bool IsMoving => isMoving;
+
+        public virtual void Init()
+        {
+            quickTimer = new QuickTimer();
+            _animator = GetComponentInChildren<Animator>();
+        }
+
+        public virtual void SetSprite(Sprite sprite)
+        {
+            if(_renderer != null)
+            {
+                _renderer.sprite = sprite;
+            }
+        }
+
+        protected bool isMoving = false;
+        protected List<HexNode> passNodes;
+        protected int passCount;
         private HexNode _fromNode;
         private HexNode _targetNode;
-        private List<HexNode> _passNodes;
-        private int _passCount;
-        private Action<Unit, HexNode, HexNode> _moveFallback;
-        public void MoveTo(HexNode fromNode, HexNode targetNode, List<HexNode> passNodes, Action<Unit, HexNode, HexNode> moveFallback = null)
+        private Action<Unit, HexNode, HexNode> _moveCB;
+        public void MoveTo(HexNode fromNode, HexNode targetNode, List<HexNode> ppassNodes, Action<Unit, HexNode, HexNode> moveCB = null)
         {
             // 如果半途换路，看看是否在中间，如果在中间就不走回去
             float sighXPre = Mathf.Sign(this.transform.position.x - fromNode.Coords.WorldPos.x);
-            float sighXNext = Mathf.Sign(passNodes[passNodes.Count - 1].Coords.WorldPos.x - this.transform.position.x);
+            float sighXNext = Mathf.Sign(ppassNodes[ppassNodes.Count - 1].Coords.WorldPos.x - this.transform.position.x);
             float sighYPre = Mathf.Sign(this.transform.position.y - fromNode.Coords.WorldPos.y);
-            float sighYNext = Mathf.Sign(passNodes[passNodes.Count - 1].Coords.WorldPos.y - this.transform.position.y);
+            float sighYNext = Mathf.Sign(ppassNodes[ppassNodes.Count - 1].Coords.WorldPos.y - this.transform.position.y);
             if (!(sighXPre * sighXNext > 0 && sighYPre * sighYNext > 0))
             {
-                passNodes.Add(fromNode);
+                ppassNodes.Add(fromNode);
             }
-
-            _passCount = passNodes.Count - 1;
-            _isMoving = true;
+            if (this is Unit3D)
+            {
+                isMoving = false;
+                RotateTo(ppassNodes[ppassNodes.Count - 1], () =>
+                {
+                    isMoving = true;
+                });
+            }
+            else
+            {
+                isMoving = true;
+            }
+            passCount = ppassNodes.Count - 1;
             _fromNode = fromNode;
             _targetNode = targetNode;
-            _passNodes = passNodes;
-            _moveFallback = moveFallback;
+            this.passNodes = ppassNodes;
+            _moveCB = moveCB;
         }
 
-        private void MoveToNode(HexNode to)
-        {
-            if(Move(to.Coords.WorldPos))
-            {
-                _passCount--;
-            }
-        }
+        protected abstract void MoveToNode(HexNode to);
 
-        Vector3 dir;
-        private bool Move(Vector3 targetPos)
+        protected bool Move(Vector3 targetPos, Vector3 dir)
         {
-            dir = (targetPos - this.transform.position).normalized;
-            this.transform.position += dir * moveSpeed * Time.deltaTime;
+            this.transform.position += dir * _moveSpeed * Time.deltaTime;
 
             if (Vector3.Distance(targetPos, this.transform.position) < 0.03f)
             {
-                HexCoord = _passNodes[_passCount].Coords.MapCoord;
+                HexCoord = passNodes[passCount].Coords.MapCoord;
 
-                if (_passCount == 0)
+                if (passCount == 0)
                 {
-                    if (_moveFallback != null)
+                    if (_moveCB != null)
                     {
-                        _moveFallback.Invoke(this, _fromNode, _targetNode);
-                        _moveFallback = null;
+                        _moveCB.Invoke(this, _fromNode, _targetNode);
+                        _moveCB = null;
                     }
-                    _passNodes = null;
-                    _isMoving = false;
+                    passNodes = null;
+                    isMoving = false;
+                    SetAnimBool("walk", false);
                 }
 
                 this.transform.position = targetPos;
@@ -81,12 +162,99 @@ namespace Tiles
             return false;
         }
 
-        private void Update()
+        protected bool _isRotating = false;
+        Quaternion _targetRotation;
+        Action _rotateCB;
+        public void RotateTo(Vector3 targetDir, Action rotateCB = null)
         {
-            if (_isMoving)
+            RotateTo(Quaternion.Euler(targetDir), rotateCB);
+        }
+
+        public void RotateTo(HexNode node, Action rotateCB = null)
+        {
+            if (Vector3.Distance(this.transform.position, node.Coords.WorldPos) < 0.01f)
             {
-                MoveToNode(_passNodes[_passCount]);
+                Debug.Log(Vector3.Distance(this.transform.position, node.Coords.WorldPos).ToString());
+                if (rotateCB != null)
+                {
+                    rotateCB.Invoke();
+                    return;
+                }
             }
+
+            SidePos sidePos = GridManager.Instance.GetTileByCoord(this.HexCoord).OtherInWhere(node);
+            Quaternion quaternion;
+            if(SidePos.None == sidePos)
+            {
+                quaternion = MapDirection.PosFaceToNodeMapDirection(this.transform.position, node);
+            }
+            else
+            {
+                quaternion = MapDirection.SideToMapDirection(sidePos);
+            }
+
+            RotateTo(quaternion, rotateCB);
+        }
+
+        public void RotateTo(Quaternion targetDir, Action rotateCB = null)
+        {
+            _isRotating = true;
+            _rotateCB = rotateCB;
+            _targetRotation = targetDir;
+        }
+
+        float threshold = 0.3f;   // 旋转完成范围
+        float coeff;
+        protected void Rotate()
+        {
+            coeff = rotationSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                _targetRotation,
+                coeff > 0.07f ? coeff : 0.07f
+            );
+            if(Quaternion.Angle(transform.rotation, _targetRotation) < threshold)
+            {
+                transform.rotation = _targetRotation;
+
+                _isRotating = false;
+                if(_rotateCB != null)
+                {
+                    _rotateCB.Invoke();
+                    _rotateCB = null;
+                }
+                SetAnimBool("turn", false);
+            }
+        }
+
+        string nowAnimPlay;
+        public void PlayAnim(string animName, float fadeTime = 0f, Action callback = null, float normalizedTimeOffset = 0, float normalizedTransitionTime = 1)
+        {
+            if (animName == nowAnimPlay) return;
+            if (_animator == null) return;
+
+            nowAnimPlay = animName;
+            _animator.CrossFade(animName, fadeTime, -1, normalizedTimeOffset, normalizedTransitionTime);
+            if (callback != null)
+            {
+                float time = Util.GetAnimationClip(_animator, animName).length;
+                quickTimer.AddTimer(time, callback);
+            }
+        }
+
+        public void SetAnimBool(string name, bool state)
+        {
+            if (_animator == null) return;
+
+            _animator.SetBool(name, state);
+        }
+
+
+        protected abstract void Update();
+
+        protected void OnDestroy()
+        {
+            quickTimer.DestroyTimers();
         }
     }
 }

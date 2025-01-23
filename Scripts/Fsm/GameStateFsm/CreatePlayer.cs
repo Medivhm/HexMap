@@ -38,8 +38,15 @@ public class CreatePlayer : IStateNode
 
     private void CreatePlayerr()
     {
-        var sprite = LoadTool.LoadSprite("Units/Player");
-        Main.Instance.MainPlayer = new Player(GridManager.Instance.SpawnSpriteUnit(GridManager.Instance.Tiles[new Vector2(0, 3)], sprite));
-        Main.Instance.MainPlayer.Unit.gameObject.name = "Player";
+        string playerPrefabPath = "2D/demo";
+        GameObject playerPrefab = LoadTool.LoadPlayer(playerPrefabPath);
+        Main.Instance.MainPlayer = new Player(GridManager.Instance.SpawnPlayerUnit(GridManager.Instance.Tiles[new Vector2(0, 3)], playerPrefab));
+
+        playerPrefabPath = "3D/coolgirl";
+        //playerPrefabPath = "3D/demo2";
+        playerPrefab = LoadTool.LoadPlayer(playerPrefabPath);
+        Main.Instance.MainPlayer = new Player(GridManager.Instance.SpawnPlayerUnit(GridManager.Instance.Tiles[new Vector2(0, 3)], playerPrefab));
+
+        Main.Instance.MainPlayer.Unit.gameObject.name = $"Player_{playerPrefabPath}";
     }
 }

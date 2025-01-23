@@ -42,5 +42,6 @@ public class GameStart : MonoBehaviour
     {
         GameManager.Instance.Behaviour = this;
         this.AddComponent<TouchDuration>();
+        this.AddComponent<TimerManager>();
     }
 }

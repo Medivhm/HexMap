@@ -9,6 +9,18 @@ namespace Tiles {
     // 游戏内容
     public partial class GridManager : MonoSingleton<GridManager>
     {
+        public Unit SpawnPlayerUnit(Vector2 pos, GameObject playerPrfab)
+        {
+            return SpawnPlayerUnit(Tiles[pos], playerPrfab);
+        }
+
+        public Unit SpawnPlayerUnit(HexNode node, GameObject playerPrfab)
+        {
+            Unit unit = GameObject.Instantiate(playerPrfab, node.Coords.WorldPos, Quaternion.identity).GetComponent<Unit>();
+            unit.Init();
+            unit.HexCoord = node.Coords.MapCoord;
+            return unit;
+        }
 
         public Unit SpawnSpriteUnit(Vector2 pos, Sprite sprite)
         {
@@ -18,7 +30,8 @@ namespace Tiles {
         public Unit SpawnSpriteUnit(HexNode node, Sprite sprite)
         {
             Unit unit = GameObject.Instantiate(_unitPrefab, node.Coords.WorldPos, Quaternion.Euler(Main.Instance.MainCameraController.EulerRotateX, 0f, 0f));
-            unit.Init(sprite);
+            unit.Init();
+            unit.SetSprite(sprite);
             unit.HexCoord = node.Coords.MapCoord;
             return unit;
         }
@@ -26,23 +39,25 @@ namespace Tiles {
         private void OnTileHover(HexNode HexNode)
         {
             //if (Main.Instance.Mode != GameMode.Play) return;
-            //if (Main.Instance.MainPlayer.Unit.IsMoving) return; // 移动不可改目标
+            //if (Main.Instance.MainPlayer.Unit.IsMoving) return; // 移动时不可改移动目标
 
             foreach (var t in Tiles.Values) t.RevertTile();
-
-            List<HexNode> passNodes = Pathfinding.FindPath(GetTileByCoord(Main.Instance.MainPlayer.Unit.HexCoord), HexNode);
+            Player player = Main.Instance.MainPlayer;
+            CameraController cameraCtrl = Main.Instance.MainCameraController;
+            List<HexNode> passNodes = Pathfinding.FindPath(GetTileByCoord(player.Unit.HexCoord), HexNode);
             if(passNodes != null && passNodes.Count > 0)
             {
-                if (Main.Instance.MainPlayer.IsOutOfScreen())
+                if (player.IsOutOfScreen()) // 如果在屏幕外
                 {
-                    Main.Instance.MainCameraController.DisableTouch();
-                    Main.Instance.MainCameraController.FollowPlayer(() =>
+                    cameraCtrl.DisableTouch();  // 禁止触摸移动放大地图
+                    cameraCtrl.FollowPlayer(() =>
                     {
-                        Main.Instance.MainCameraController.EnableTouch();
-                        Main.Instance.MainPlayer.Unit.MoveTo(GetTileByCoord(Main.Instance.MainPlayer.Unit.HexCoord), HexNode, passNodes,
+                        // 摄像机移动，使得角色出现在左屏中央后
+                        cameraCtrl.EnableTouch();  // 恢复触摸
+                        player.Unit.MoveTo(GetTileByCoord(player.Unit.HexCoord), HexNode, passNodes,  // 角色开始移动
                             (_, _, _) =>
                             {
-                                Main.Instance.MainCameraController.CameraMoveToHex(HexNode);
+                                cameraCtrl.CameraMoveToHex(HexNode);
                             });
                     });
                 }

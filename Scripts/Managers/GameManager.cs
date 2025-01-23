@@ -1,32 +1,26 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UniFramework.Event;
 
-public class GameManager
+public class GameManager : Singleton<GameManager>
 {
-    private static GameManager _instance;
-    public static GameManager Instance
-    {
-        get
-        {
-            if (_instance == null)
-                _instance = new GameManager();
-            return _instance;
-        }
-    }
-
     /// <summary>
     /// 协程启动器
     /// </summary>
     public MonoBehaviour Behaviour;
 
-
     /// <summary>
     /// 开启一个协程
     /// </summary>
-    public void StartCoroutine(IEnumerator enumerator)
+    public Coroutine StartCoroutine(IEnumerator enumerator)
     {
-        Behaviour.StartCoroutine(enumerator);
+        return Behaviour.StartCoroutine(enumerator);
+    }
+
+    /// <summary>
+    /// 关闭一个协程
+    /// </summary>
+    public void StopCoroutine(Coroutine coroutine)
+    {
+        Behaviour.StopCoroutine(coroutine);
     }
 }
