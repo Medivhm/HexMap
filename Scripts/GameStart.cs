@@ -11,9 +11,9 @@ public class GameStart : MonoBehaviour
     {
 #if UNITY_EDITOR
         ///Test
-        if(Input.GetKeyDown(KeyCode.K))
+        if(Input.GetKeyDown(KeyCode.F))
         {
-            Main.Instance.MainCameraController.FollowPlayer();
+            Main.Instance.MainCameraController.StartGameCamera();
         }
         ///
 #endif

@@ -44,9 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 631cfa3b6e91d154494880f7ed93a43d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerSprite: {fileID: 0}
-  _goalSprite: {fileID: 0}
   _drawConnections: 1
+  _lineRenderMaterial: {fileID: 0}
   _gridWidth: 20
-  _gridDepth: 20
-  HexNodePrefab: {fileID: 0}
+  _gridHeight: 20
+  _gridType: 0

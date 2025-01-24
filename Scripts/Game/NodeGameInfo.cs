@@ -11,14 +11,14 @@ public class NodeGameInfo
     private Unit[] others;
 
     private Action _playerInEvent;
-    private GridType _gridType;
+    private HexType _hexType;
 
     public bool HasEvent => _playerInEvent != null;
-    public GridType GridType => _gridType;
+    public HexType HexType => _hexType;
 
-    public NodeGameInfo(GridType type)
+    public NodeGameInfo(HexType type)
     {
-        this._gridType = type;
+        this._hexType = type;
     }
 
     public void SetPlayerInEvent(Action a)

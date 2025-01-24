@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tiles;
 using UnityEngine;
 
-public enum GridType
+public enum HexType
 {
     Playable = 0,   // ½»»¥¹Ø¿¨
     Obstacle,       // ÕÏ°­
@@ -30,7 +31,7 @@ namespace Tiles {
         NodeGameInfo gameInfo;
         [SerializeField] private List<SidePos> passSide;
 
-        public void AfterInit(GridType type)
+        public void AfterInit(HexType type)
         {
             this.name = string.Format("{0}_{1}", Coords.MapCoord.x, Coords.MapCoord.y);
             gameInfo = new NodeGameInfo(type);
@@ -83,6 +84,7 @@ namespace Tiles {
             {
                 return SidePos.NW;
             }
+
             return SidePos.None;
         }
 
@@ -122,13 +124,18 @@ namespace Tiles {
             _polygonCollider = GetComponent<PolygonCollider2D>();
         }
 
-        public void Init(GridType gridType, ICoords coords)
+        public void Init(HexType hexType, ICoords coords)
         {
             OnHoverTile += OnOnHoverTile;
 
             Coords = coords;
             transform.position = Coords.WorldPos;
-            AfterInit(gridType);
+            AfterInit(hexType);
+        }
+
+        public void RotateIconToFlat()
+        {
+            transform.GetChild(0).rotation = Quaternion.Euler(0f, 0f, 30f);
         }
 
         public void SetLineMaterial(Material mater)
@@ -225,7 +232,16 @@ public struct HexCoords : ICoords
     public HexCoords(int q, int r) {
         _q = q;
         _r = r;
-        WorldPos = _q * new Vector2(Sqrt3, 0) + _r * new Vector2(Sqrt3 / 2, 1.5f);
+        if(GridManager.Instance.GridType == GridType.Pointy)
+        {
+            // Pointy
+            WorldPos = _q * new Vector2(Sqrt3, 0) + _r * new Vector2(Sqrt3 / 2, 1.5f);
+        }
+        else
+        {
+            // Flat
+            WorldPos = new Vector2(1.5f * q, Sqrt3 * (_r + _q * 0.5f));
+        }
     }
 
     public float GetDistance(ICoords other) => (this - (HexCoords)other).AxialLength();

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
+
+public enum GridType
+{
+    Pointy,
+    Flat,
+}
 
 namespace Tiles {
-
     // 游戏内容
     public partial class GridManager : MonoSingleton<GridManager>
     {
@@ -44,8 +47,15 @@ namespace Tiles {
             foreach (var t in Tiles.Values) t.RevertTile();
             Player player = Main.Instance.MainPlayer;
             CameraController cameraCtrl = Main.Instance.MainCameraController;
+
             List<HexNode> passNodes = Pathfinding.FindPath(GetTileByCoord(player.Unit.HexCoord), HexNode);
-            if(passNodes != null && passNodes.Count > 0)
+
+            if (HexNode.Coords.MapCoord.Equals(player.Unit.HexCoord) && Vector3.Distance(player.Unit.transform.position, HexNode.transform.position) > 0.002f)
+            {
+                // 如果往外走但还在格子里又点击了这个格子
+                passNodes.Add(HexNode);
+            }
+            if (passNodes != null && passNodes.Count > 0 )
             {
                 if (player.IsOutOfScreen()) // 如果在屏幕外
                 {
@@ -87,13 +97,14 @@ namespace Tiles {
         [SerializeField] private bool _drawConnections;
         [SerializeField] private Material _lineRenderMaterial;
         [SerializeField, Range(1, 50)] private int _gridWidth;
-        [SerializeField, Range(1, 50)] private int _gridDepth;
+        [SerializeField, Range(1, 50)] private int _gridHeight;
+        [SerializeField] private GridType _gridType;
         HexNode HexNodePrefab;
 
         private Unit _unitPrefab;
         private Action TileInitCB;
         public Dictionary<Vector2, HexNode> Tiles { get; private set; }
-
+        public GridType GridType => _gridType;
         private void Awake()
         {
             _unitPrefab = LoadTool.LoadPrefab("Unit").GetComponent<Unit>();
@@ -138,29 +149,59 @@ namespace Tiles {
             {
                 name = "Grid"
             };
-            for (var r = 0; r < _gridDepth; r++)
+
+            if (GridType.Pointy == _gridType)
             {
-                var rOffset = r >> 1;
-                for (var q = -rOffset; q < _gridWidth - rOffset; q++)
+
+                for (var r = 0; r < _gridHeight; r++)
                 {
-                    HexNode tile;
-                    // 准备通过配置加载地面
-                    string name = TempIdToPrefabName.FindName(new Vector2Int(q, r));
-                    if (name != null)
+                    var rOffset = r >> 1;
+                    for (var q = -rOffset; q < _gridWidth - rOffset; q++)
                     {
-                        tile = Instantiate(LoadHexByName(name), grid.transform);
+                        HexNode tile;
+                        // 准备通过配置加载地面
+                        string name = TempIdToPrefabName.FindName(new Vector2Int(q, r));
+                        if (name != null)
+                        {
+                            tile = Instantiate(LoadHexByName(name), grid.transform);
+                        }
+                        else
+                        {
+                            tile = Instantiate(LoadHexByName("ObstacleHex"), grid.transform);
+                        }
+
+                        tile.Init(CalcuHexType(q, r), new HexCoords(q, r));
+                        tiles.Add(tile.Coords.MapCoord, tile);
+                        tile.SetLineMaterial(_lineRenderMaterial);
+                        tile.UpdateLineRenderer();
                     }
-                    else
+                }
+            }
+            else if (GridType.Flat == _gridType)
+            {
+                for (int q = 0; q < _gridWidth; q++)
+                {
+                    int qOff = q >> 1;
+                    for (int r = -qOff; r < _gridHeight - qOff; r++)
                     {
-                        tile = Instantiate(LoadHexByName("ObstacleHex"), grid.transform);
+                        HexNode tile;
+                        // 准备通过配置加载地面
+                        string name = TempIdToPrefabName.FindName(new Vector2Int(q, r));
+                        if (name != null)
+                        {
+                            tile = Instantiate(LoadHexByName(name), grid.transform);
+                        }
+                        else
+                        {
+                            tile = Instantiate(LoadHexByName("ObstacleHex"), grid.transform);
+                        }
+
+                        tile.Init(CalcuHexType(q, r), new HexCoords(q, r));
+                        tile.RotateIconToFlat();
+                        tiles.Add(tile.Coords.MapCoord, tile);
+                        tile.SetLineMaterial(_lineRenderMaterial);
+                        tile.UpdateLineRenderer();
                     }
-
-
-
-                    tile.Init(CalcuGridType(q, r), new HexCoords(q, r));
-                    tiles.Add(tile.Coords.MapCoord, tile);
-                    tile.SetLineMaterial(_lineRenderMaterial);
-                    tile.UpdateLineRenderer();
                 }
             }
             return tiles;
@@ -189,9 +230,9 @@ namespace Tiles {
 
         public HexNode GetTileByCoord(Vector2 pos) => Tiles.TryGetValue(pos, out var tile) ? tile : null;
 
-        private GridType CalcuGridType(int q, int r)
+        private HexType CalcuHexType(int q, int r)
         {
-            return GridType.Road;
+            return HexType.Road;
         }
     }
 }

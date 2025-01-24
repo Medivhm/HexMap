@@ -8,30 +8,61 @@ namespace Tiles
 {
     public static class MapDirection
     {
-        public static readonly Quaternion NE = Quaternion.Euler(0f, 0f, 145f);
-        public static readonly Quaternion E = Quaternion.Euler(0f, 0f, 90f);
-        public static readonly Quaternion SE = Quaternion.Euler(0f, 0f, 45f);
-        public static readonly Quaternion SW = Quaternion.Euler(0f, 0f, -45f);
-        public static readonly Quaternion W = Quaternion.Euler(0f, 0f, -90f);
-        public static readonly Quaternion NW = Quaternion.Euler(0f, 0f, -135f);
+        private static readonly float Sqrt3 = Mathf.Sqrt(3);
+
+        public static readonly Quaternion Point_NE = Quaternion.Euler(0f, 0f, 145f);
+        public static readonly Quaternion Point_E  = Quaternion.Euler(0f, 0f, 90f);
+        public static readonly Quaternion Point_SE = Quaternion.Euler(0f, 0f, 45f);
+        public static readonly Quaternion Point_SW = Quaternion.Euler(0f, 0f, -45f);
+        public static readonly Quaternion Point_W  = Quaternion.Euler(0f, 0f, -90f);
+        public static readonly Quaternion Point_NW = Quaternion.Euler(0f, 0f, -135f);
+
+        public static readonly Quaternion Flat_NE = Quaternion.Euler(0f, 0f, 120f);
+        public static readonly Quaternion Flat_SE = Quaternion.Euler(0f, 0f, 60f);
+        public static readonly Quaternion Flat_S  = Quaternion.Euler(0f, 0f, 0f);
+        public static readonly Quaternion Flat_SW = Quaternion.Euler(0f, 0f, -60f);
+        public static readonly Quaternion Flat_NW = Quaternion.Euler(0f, 0f, -120f);
+        public static readonly Quaternion Flat_N  = Quaternion.Euler(0f, 0f, -180f);
 
         public static Quaternion SideToMapDirection(SidePos sidePos)
         {
-            switch (sidePos)
+            if(GridManager.Instance.GridType == GridType.Pointy)
             {
-                case SidePos.NE:
-                    return MapDirection.NE;
-                case SidePos.E:
-                    return MapDirection.E;
-                case SidePos.SE:
-                    return MapDirection.SE;
-                case SidePos.SW:
-                    return MapDirection.SW;
-                case SidePos.W:
-                    return MapDirection.W;
-                case SidePos.NW:
-                    return MapDirection.NW;
+                switch (sidePos)
+                {
+                    case SidePos.NE:
+                        return MapDirection.Point_NE;
+                    case SidePos.E:
+                        return MapDirection.Point_E;
+                    case SidePos.SE:
+                        return MapDirection.Point_SE;
+                    case SidePos.SW:
+                        return MapDirection.Point_SW;
+                    case SidePos.W:
+                        return MapDirection.Point_W;
+                    case SidePos.NW:
+                        return MapDirection.Point_NW;
+                }
             }
+            else
+            {
+                switch (sidePos)
+                {
+                    case SidePos.NE:
+                        return MapDirection.Flat_N;
+                    case SidePos.E:
+                        return MapDirection.Flat_NE;
+                    case SidePos.SE:
+                        return MapDirection.Flat_SE;
+                    case SidePos.SW:
+                        return MapDirection.Flat_S;
+                    case SidePos.W:
+                        return MapDirection.Flat_SW;
+                    case SidePos.NW:
+                        return MapDirection.Flat_NW;
+                }
+            }
+
             return Quaternion.identity;
         }
 
@@ -39,43 +70,79 @@ namespace Tiles
         {
             Vector3 nodePos = node.Coords.WorldPos;
             Vector3 diff = pos - nodePos;
-            if(diff.x > 0 && Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
+            if (GridManager.Instance.GridType == GridType.Pointy)
             {
-                if(diff.y > 0)
+                if (diff.x > 0 && Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
                 {
-                    return MapDirection.SW;
+                    if (diff.y > 0)
+                    {
+                        return MapDirection.Point_SW;
+                    }
+                    else
+                    {
+                        return MapDirection.Point_NW;
+                    }
+                }
+                else if (diff.x < 0 && Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
+                {
+                    if (diff.y > 0)
+                    {
+                        return MapDirection.Point_SE;
+                    }
+                    else
+                    {
+                        return MapDirection.Point_NE;
+                    }
+                }
+                else if (diff.x > 0)
+                {
+                    return MapDirection.Point_W;
                 }
                 else
                 {
-                    return MapDirection.NW;
+                    return MapDirection.Point_E;
                 }
-            }
-            else if(diff.x < 0 && Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
-            {
-                if (diff.y > 0)
-                {
-                    return MapDirection.SE;
-                }
-                else
-                {
-                    return MapDirection.NE;
-                }
-            }
-            else if(diff.x > 0)
-            {
-                return MapDirection.W;
             }
             else
             {
-                return MapDirection.E;
+                if (diff.x > 0 && Mathf.Abs(diff.y) < Sqrt3 * diff.x)
+                {
+                    if (diff.y > 0)
+                    {
+                        return MapDirection.Flat_SW;
+                    }
+                    else
+                    {
+                        return MapDirection.Flat_NW;
+                    }
+                }
+                else if (diff.x < 0 && Mathf.Abs(diff.y) < Sqrt3 * Mathf.Abs(diff.x))
+                {
+                    if (diff.y > 0)
+                    {
+                        return MapDirection.Flat_SE;
+                    }
+                    else
+                    {
+                        return MapDirection.Flat_NE;
+                    }
+                }
+                else if (diff.y > 0)
+                {
+                    return MapDirection.Flat_S;
+                }
+                else
+                {
+                    return MapDirection.Flat_N;
+                }
             }
         }
-    };
+    }
 
     public abstract class Unit : MonoBehaviour
     {
         [SerializeField] private float _moveSpeed = 1.8f;
-        [SerializeField] private float rotationSpeed = 2f;
+        [SerializeField] private float _rotateDegPerSecond = 3f;
         private SpriteRenderer _renderer;
         private Animator _animator;
 
@@ -170,7 +237,7 @@ namespace Tiles
             RotateTo(Quaternion.Euler(targetDir), rotateCB);
         }
 
-        public void RotateTo(HexNode node, Action rotateCB = null)
+        public virtual void RotateTo(HexNode node, Action rotateCB = null)
         {
             if (Vector3.Distance(this.transform.position, node.Coords.WorldPos) < 0.01f)
             {
@@ -204,15 +271,16 @@ namespace Tiles
         }
 
         float threshold = 0.3f;   // Ðý×ªÍê³É·¶Î§
-        float coeff;
+        //float coeff;
         protected void Rotate()
         {
-            coeff = rotationSpeed * Time.deltaTime;
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                _targetRotation,
-                coeff > 0.07f ? coeff : 0.07f
-            );
+            //coeff = rotationSpeed * Time.deltaTime;
+            //transform.rotation = Quaternion.Slerp(
+            //    transform.rotation,
+            //    _targetRotation,
+            //    coeff > 0.03f ? coeff : 0.03f
+            //);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation, _rotateDegPerSecond);
             if(Quaternion.Angle(transform.rotation, _targetRotation) < threshold)
             {
                 transform.rotation = _targetRotation;
@@ -247,6 +315,7 @@ namespace Tiles
             if (_animator == null) return;
 
             _animator.SetBool(name, state);
+            Debug.LogFormat("{0}_{1}", name, state.ToString());
         }
 
 

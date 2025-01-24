@@ -87,6 +87,8 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        if(Main.Instance.MainPlayer == null) return;
+
         CheckHandTouch();    // 判断触摸模式
         if(MoveType == MoveType.FreeMove && canTouchMove)
         {
@@ -147,6 +149,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     public void StartGameCamera()
     {
+        // 如果FollowPlayer过早的话（在场景刚加载完后），CameraMoveToPos摄像机移动位置会有误
         SetMoveType(MoveType.FollowPlayer);
     }
 
@@ -154,11 +157,11 @@ public class CameraController : MonoBehaviour
     {
         CameraMoveToPos(Main.Instance.MainPlayer.Unit.transform.position, () =>
         {
-            if(ac != null)
+            SetMoveType(MoveType.FollowPlayer);
+            if (ac != null)
             {
                 ac.Invoke();
             }
-            SetMoveType(MoveType.FollowPlayer);
         });
     }
 
@@ -175,7 +178,7 @@ public class CameraController : MonoBehaviour
 
     public void CameraMoveToPos(Vector3 pos, Action ac = null)
     {
-        targetPos = CalcuFollowPos(pos);  // 传进来的pos有问题
+        targetPos = CalcuFollowPos(pos);
         isMoving = true;
         arriveCB = ac;
     }
@@ -236,7 +239,7 @@ public class CameraController : MonoBehaviour
 
         float lerp = smoothCoeff * (1 - Mathf.Exp(-Time.deltaTime));
         transform.position = Vector3.Lerp(transform.position, targetPos, lerp > 0.023f ? lerp : 0.023f);
-        if (Vector3.Distance(targetPos, this.transform.position) < 0.02f)
+        if (Vector3.Distance(targetPos, this.transform.position) < 0.001f)
         {
             this.transform.position = targetPos;
             isMoving = false;
