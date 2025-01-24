@@ -25,6 +25,8 @@ public class GameStart : MonoBehaviour
         LocalInit();
 
         _gameState = new StateMachine(this);
+        _gameState.AddNode<HotFix>();
+        _gameState.AddNode<LoadData>();
         _gameState.AddNode<DoOtherThing>();
         _gameState.AddNode<LoadGridManager>();
         _gameState.AddNode<CreatePlayer>();
@@ -34,7 +36,7 @@ public class GameStart : MonoBehaviour
 
     private void Start()
     {
-        _gameState.Run<DoOtherThing>();
+        _gameState.Run<HotFix>();
     }
 
     // 非ab包内容初始化

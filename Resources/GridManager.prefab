@@ -46,6 +46,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _drawConnections: 1
   _lineRenderMaterial: {fileID: 0}
-  _gridWidth: 20
-  _gridHeight: 20
-  _gridType: 0
+  _gridWidth: 10
+  _gridHeight: 10
+  _gridType: 1

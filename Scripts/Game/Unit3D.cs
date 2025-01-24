@@ -51,6 +51,13 @@ namespace Tiles
                 SetAnimBool("walk", true);
                 MoveToNode(passNodes[passCount]);
             }
+
+#if UNITY_EDITOR
+            if (Input.GetKey(KeyCode.Alpha1))
+            {
+                PlayAnim("Dance");
+            }
+#endif
         }
     }
 }

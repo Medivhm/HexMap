@@ -32,4 +32,9 @@ public class LoadTool
     {
         return LoadPrefab($"Player/{path}");
     }
+
+    public static UIEntity LoadUI(string path)
+    {
+        return LoadPrefab($"UI/{path}").GetComponent<UIEntity>();
+    }
 }

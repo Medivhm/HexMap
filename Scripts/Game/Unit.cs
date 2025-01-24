@@ -298,7 +298,7 @@ namespace Tiles
         string nowAnimPlay;
         public void PlayAnim(string animName, float fadeTime = 0f, Action callback = null, float normalizedTimeOffset = 0, float normalizedTransitionTime = 1)
         {
-            if (animName == nowAnimPlay) return;
+            //if (animName == nowAnimPlay) return;
             if (_animator == null) return;
 
             nowAnimPlay = animName;
@@ -315,7 +315,7 @@ namespace Tiles
             if (_animator == null) return;
 
             _animator.SetBool(name, state);
-            Debug.LogFormat("{0}_{1}", name, state.ToString());
+            //Debug.LogFormat("{0}_{1}", name, state.ToString());
         }
 
 

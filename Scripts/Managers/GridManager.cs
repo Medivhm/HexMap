@@ -179,10 +179,10 @@ namespace Tiles {
             }
             else if (GridType.Flat == _gridType)
             {
-                for (int q = 0; q < _gridWidth; q++)
+                for (int q = 0; q <  _gridWidth; q++)
                 {
-                    int qOff = q >> 1;
-                    for (int r = -qOff; r < _gridHeight - qOff; r++)
+                    int qOffset = q >> 1;
+                    for (int r = -qOffset; r < _gridHeight - qOffset; r++)
                     {
                         HexNode tile;
                         // 准备通过配置加载地面

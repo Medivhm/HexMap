@@ -3,8 +3,29 @@ using Tiles;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIFunction : MonoBehaviour
+public partial class MainCanvas : MonoBehaviour
 {
+    // main game logic
+    public Transform LeftScreen, RightScreen, WholeScreen;
+
+    private void Awake()
+    {
+        LeftScreen = transform.Find("LeftScreen");
+        RightScreen = transform.Find("RightScreen");
+        WholeScreen = transform.Find("WholeScreen");
+        Main.Instance.MainCanvas = this.GetComponent<MainCanvas>();
+    }
+
+    private void OnDestroy()
+    {
+        Main.Instance.MainCanvas = null;
+    }
+}
+
+
+public partial class MainCanvas : MonoBehaviour
+{
+    // All Test
     public Text text;
 
 
@@ -25,21 +46,6 @@ public class UIFunction : MonoBehaviour
     public void Quit()
     {
         Application.Quit();
-    }
-
-    public Text ChangeModeText;
-    public void ChangeGameMode()
-    {
-        if(Main.Instance.Mode == GameMode.Play)
-        {
-            Main.Instance.Mode = GameMode.MoveMap;
-            ChangeModeText.text = "“∆∂Ø";
-        }
-        else if(Main.Instance.Mode == GameMode.MoveMap)
-        {
-            Main.Instance.Mode = GameMode.Play;
-            ChangeModeText.text = "”Œœ∑";
-        }
     }
 
     public void ShowAllBorders()
