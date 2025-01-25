@@ -11,7 +11,7 @@ public class TouchDuration : MonoSingleton<TouchDuration>
     private Vector2 _touchPos;
 
     private float _touchJudgeTime = 0.5f; // 判定为长按的时间
-    private float _touchJudgeDist = 1f;   // 判定为拖动的距离
+    private float _touchJudgeDist = 2f;   // 判定为拖动的距离
 
 
     private void Update()

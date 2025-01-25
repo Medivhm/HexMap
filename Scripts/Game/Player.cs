@@ -39,6 +39,6 @@ public class Player
     {
         Vector3 characterScreenPos = Camera.main.WorldToScreenPoint(_unit.transform.position);
         return characterScreenPos.x > Screen.width || characterScreenPos.x < 0 ||
-               characterScreenPos.y > Screen.width || characterScreenPos.y < 0;
+               characterScreenPos.y > Screen.height || characterScreenPos.y < 0;
     }
 }

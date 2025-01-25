@@ -60,9 +60,11 @@ namespace Tiles {
                 if (player.IsOutOfScreen()) // 如果在屏幕外
                 {
                     cameraCtrl.DisableTouch();  // 禁止触摸移动放大地图
-                    cameraCtrl.FollowPlayer(() =>
+                    player.Unit.StopMove();
+                    cameraCtrl.MoveToPlayer(() =>
                     {
                         // 摄像机移动，使得角色出现在左屏中央后
+                        cameraCtrl.FollowPlayer();
                         cameraCtrl.EnableTouch();  // 恢复触摸
                         player.Unit.MoveTo(GetTileByCoord(player.Unit.HexCoord), HexNode, passNodes,  // 角色开始移动
                             (_, _, _) =>

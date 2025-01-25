@@ -58,8 +58,11 @@ public partial class MainCanvas : MonoBehaviour
         GridManager.Instance.HideAllBorders();
     }
 
-    public void ChangeToFollowPlayerMode()
+    public void ChangeToFollowMode()
     {
-        Main.Instance.MainCameraController.FollowPlayer();
+        Main.Instance.MainCameraController.MoveToPlayer(() =>
+        {
+            Main.Instance.MainCameraController.FollowPlayer();
+        });
     }
 }

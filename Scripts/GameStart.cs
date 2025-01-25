@@ -13,7 +13,10 @@ public class GameStart : MonoBehaviour
         ///Test
         if(Input.GetKeyDown(KeyCode.F))
         {
-            Main.Instance.MainCameraController.StartGameCamera();
+            Main.Instance.MainCameraController.MoveToPlayer(() =>
+            {
+                Main.Instance.MainCameraController.FollowPlayer();
+            });
         }
         ///
 #endif

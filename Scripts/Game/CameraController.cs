@@ -12,7 +12,13 @@ public enum HandType
 public enum MoveType
 {
     FreeMove,            // 可自由移动
-    FollowPlayer,        // 不可自由移动
+    Follow,              // 不可自由移动
+}
+
+public enum CameraMoveTo
+{
+    Pos,
+    Transfrom,
 }
 
 public class CameraController : MonoBehaviour
@@ -95,7 +101,7 @@ public class CameraController : MonoBehaviour
             CameraMove();        // 地图拖动
             CameraZoom();        // 地图放大缩小
         }
-        else if(MoveType == MoveType.FollowPlayer)
+        else if(MoveType == MoveType.Follow)
         {
             CameraMoveToPos(Main.Instance.MainPlayer.Unit.transform.position);
         }
@@ -149,15 +155,13 @@ public class CameraController : MonoBehaviour
     /// </summary>
     public void StartGameCamera()
     {
-        // 如果FollowPlayer过早的话（在场景刚加载完后），CameraMoveToPos摄像机移动位置会有误
-        SetMoveType(MoveType.FollowPlayer);
+        FollowPlayer();
     }
 
-    public void FollowPlayer(Action ac = null)
+    public void MoveToPlayer(Action ac = null)
     {
         CameraMoveToPos(Main.Instance.MainPlayer.Unit.transform.position, () =>
         {
-            SetMoveType(MoveType.FollowPlayer);
             if (ac != null)
             {
                 ac.Invoke();
@@ -165,22 +169,60 @@ public class CameraController : MonoBehaviour
         });
     }
 
+    public void FollowPlayer()
+    {
+        CameraFollowTransform(Main.Instance.MainPlayer.Unit.transform);
+    }
 
-    Vector3 targetPos;
+    CameraMoveTo _moveTo;
+    Vector3 _targetPos;
+    Transform _targetTrans;
+    Vector3 targetPos
+    {
+        get
+        {
+            if(_moveTo == CameraMoveTo.Pos)
+            {
+                return CalcuFollowPos(_targetPos);
+            }
+            else
+            {
+                return CalcuFollowPos(_targetTrans.position);
+            }
+        }
+    }
+
     float smoothCoeff = 1.5f;
     bool isMoving = false;
     Action arriveCB;
-
     public void CameraMoveToHex(HexNode hexNode, Action ac = null)
     {
         CameraMoveToPos(hexNode.Coords.WorldPos, ac);
     }
 
+    // MovePos 和 FollowTrans 互斥
     public void CameraMoveToPos(Vector3 pos, Action ac = null)
     {
-        targetPos = CalcuFollowPos(pos);
+        SetTarget(pos);
         isMoving = true;
         arriveCB = ac;
+    }
+
+    // 最好是静态Trans，不然这个回调的时机..从逻辑上就很难判定
+    public void CameraMoveToTrans(Transform trans, Action ac = null)
+    {
+        SetTarget(trans);
+        isMoving = true;
+        arriveCB = ac;
+    }
+
+    // 和上面两个区别是，这个除非自动解除跟随，否则始终跟随
+    public void CameraFollowTransform(Transform trans)
+    {
+        SetTarget(trans);
+        MoveType = MoveType.Follow;
+        isMoving = true;
+        arriveCB = null;
     }
 
     /// <summary>
@@ -191,6 +233,17 @@ public class CameraController : MonoBehaviour
         isMoving = false;
     }
 
+    private void SetTarget(Vector3 pos)
+    {
+        _moveTo = CameraMoveTo.Pos;
+        _targetPos = pos;
+    }
+
+    private void SetTarget(Transform trans)
+    {
+        _moveTo = CameraMoveTo.Transfrom;
+        _targetTrans = trans;
+    }
     #endregion
 
     #region 内部状态切换，不对外
@@ -287,13 +340,12 @@ public class CameraController : MonoBehaviour
         StopSmoothMove();
 #if UNITY_EDITOR || UNITY_EDITOR_WIN
         this.transform.position -= Down * scroll * scrollSpeed * Time.deltaTime;
-        distZ = -this.transform.position.z;
-        
 #else
         float distance = (Input.GetTouch(1).position - Input.GetTouch(0).position).magnitude;
         this.transform.position -= Down * (distance - tempFloat) * 0.1f * Time.deltaTime;
         tempFloat = distance;
 #endif
+        distZ = -this.transform.position.z; 
     }
 
     #endregion

@@ -318,6 +318,12 @@ namespace Tiles
             //Debug.LogFormat("{0}_{1}", name, state.ToString());
         }
 
+        public void StopMove()
+        {
+            SetAnimBool("walk", false);
+            SetAnimBool("turn", false);
+            isMoving = false;
+        }
 
         protected abstract void Update();
 

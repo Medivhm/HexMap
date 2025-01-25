@@ -27,6 +27,7 @@ namespace Tiles
             if (Move(to.Coords.WorldPos, (to.Coords.WorldPos - this.transform.position).normalized))
             //if (Move(to.Coords.WorldPos, FaceTo))  // 想移动和行走同步的
             {
+                HexCoord = to.Coords.MapCoord;
                 passCount--;
                 if (isMoving) // 如果还没走到终点站
                 {
