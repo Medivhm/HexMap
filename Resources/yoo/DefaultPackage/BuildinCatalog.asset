@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b05c83971e3dca94f9fa460d396385e5, type: 3}
+  m_Name: BuildinCatalog
+  m_EditorClassIdentifier: 
+  PackageName: DefaultPackage
+  PackageVersion: 1.0.0
+  Wrappers:
+  - BundleGUID: 62a171fd2204d7c0f1c23854911aa026
+    FileName: assets_prefabs_hextile_62a171fd2204d7c0f1c23854911aa026.bundle
+  - BundleGUID: c182f81ae46dbdcf62226f91ba2a4cc8
+    FileName: assets_prefabs_other_c182f81ae46dbdcf62226f91ba2a4cc8.bundle
+  - BundleGUID: abf6aeb0039ca4c3ab830d8d5036cc27
+    FileName: assets_prefabs_player_2d_abf6aeb0039ca4c3ab830d8d5036cc27.bundle
+  - BundleGUID: fe17185b84f3d16ccaa55248bd05ac34
+    FileName: assets_prefabs_player_3d_fe17185b84f3d16ccaa55248bd05ac34.bundle
+  - BundleGUID: a5180fec12abb7f869a74adfe870c979
+    FileName: assets_prefabs_ui_a5180fec12abb7f869a74adfe870c979.bundle
+  - BundleGUID: 18c4c9e9a4f0d80266f475fa6be622b9
+    FileName: share_assets_animator_18c4c9e9a4f0d80266f475fa6be622b9.bundle
+  - BundleGUID: af485e9c4019ccc98fcfa5d642cfbc8b
+    FileName: share_assets_animator_player_coolgirl_af485e9c4019ccc98fcfa5d642cfbc8b.bundle
+  - BundleGUID: 615d4e39044f51f9fc318179c8369fc4
+    FileName: share_assets_model_player_aj_615d4e39044f51f9fc318179c8369fc4.bundle
+  - BundleGUID: bb4add0dbaf93b5c97eb35e264371242
+    FileName: share_assets_model_player_aj_aj_fbm_bb4add0dbaf93b5c97eb35e264371242.bundle
+  - BundleGUID: bb90792f17143838b9554e655c670653
+    FileName: share_assets_model_player_aj_materials_bb90792f17143838b9554e655c670653.bundle
+  - BundleGUID: 726e3bae99e2631e3d916e3dfab94e2e
+    FileName: share_assets_model_player_coolgirl_726e3bae99e2631e3d916e3dfab94e2e.bundle
+  - BundleGUID: c9fda2dce2c5563f21fc5121d6820a5a
+    FileName: share_assets_model_player_coolgirl_coolgirl_fbm_c9fda2dce2c5563f21fc5121d6820a5a.bundle
+  - BundleGUID: ce03d75a070f913928466f77e83dc8be
+    FileName: share_assets_model_player_coolgirl_materials_ce03d75a070f913928466f77e83dc8be.bundle
+  - BundleGUID: 2a07d6a23e95a1cf957a3cb92345da07
+    FileName: share_assets_sprite_tiles_2a07d6a23e95a1cf957a3cb92345da07.bundle
+  - BundleGUID: 6f67a9b94594bcc593701a0f81484a5d
+    FileName: share_assets_sprite_units_6f67a9b94594bcc593701a0f81484a5d.bundle
